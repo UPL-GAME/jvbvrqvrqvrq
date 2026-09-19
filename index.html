@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mock Test Professional</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
+
+    <style>
+        :root {
+            --primary: #248bcf;
+            --success: #28a745;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #e0e0e0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        h3 { text-align:center;color:var(--primary);margin-bottom:25px;font-size:24px;}
+        .q-row {display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:15px;}
+        .q-num {font-weight:bold;min-width:30px;color:#666;}
+        .options-container {display:flex;flex-wrap:wrap;gap:8px;}
+        .opt-btn {min-width:40px;height:40px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-weight:600;}
+        .opt-btn.active {background:var(--primary);color:white;border-color:var(--primary);transform:scale(1.05);}
+        math-field {width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:#fafafa;font-size:18px;}
+        .submit-btn {width:100%;padding:16px;background:var(--success);color:white;border:none;border-radius:12px;font-size:18px;font-weight:bold;margin-top:30px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Mock Test Javoblarini belgilang</h3>
+    <div id="test-form"></div>
+    <button class="submit-btn" onclick="sendToBot()">Javoblarni yuborish</button>
+</div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const form = document.getElementById('test-form');
+
+    // 1–32 (A B C D)
+    for(let i=1; i<=32; i++) createMCQ(i, ['A','B','C','D']);
+
+    // 33–35 (A B C D E F)
+    for(let i=33; i<=35; i++) createMCQ(i, ['A','B','C','D','E','F']);
+
+    // 36–45 (har biri a va b yozma)
+    for(let i=36; i<=45; i++) createDoubleMathInput(i);
+
+
+    function createMCQ(num, options) {
+        let div = document.createElement('div');
+        div.className='q-row';
+        let html=`<span class="q-num">${num}.</span><div class="options-container" id="q${num}">`;
+        options.forEach(opt=>{
+            html+=`<button class="opt-btn" onclick="selectOpt(this,${num})">${opt}</button>`;
+        });
+        html+=`</div>`;
+        div.innerHTML=html;
+        form.appendChild(div);
+    }
+
+    function selectOpt(btn,num){
+        let parent=document.getElementById(`q${num}`);
+        Array.from(parent.children).forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function createDoubleMathInput(num){
+        let div=document.createElement('div');
+        div.className='q-row';
+        div.style.flexDirection='column';
+        div.innerHTML=`
+            <span class="q-num">${num}. a) Javob:</span>
+            <math-field id="q${num}a" virtual-keyboard-mode="onfocus"></math-field>
+            <span class="q-num">${num}. b) Javob:</span>
+            <math-field id="q${num}b" virtual-keyboard-mode="onfocus"></math-field>`;
+        form.appendChild(div);
+    }
+
+function showResultCard(codeText) {
+    // 010101... zanjirini BigInt yordamida Base36 (harf va raqamlar) formatiga siqamiz
+    // Oldiga '1' qo'shamiz, aks holda boshidagi nollar (000...) o'chib ketadi
+    const binaryWithPrefix = '1' + codeText;
+    const compressedCode = BigInt('0b' + binaryWithPrefix).toString(36); 
+
+    document.body.innerHTML = `
+        <div class="card">
+            <div class="icon">🔑</div>
+            <h1>Sizning Shaxsiy Kodingiz</h1>
+            
+            <div class="code-box">
+                <!-- Ekranda juda qisqa kod ko'rinadi (Masalan: "k3f8g2m9p1") -->
+                <span class="code-text" id="myCode">${compressedCode}</span>
+                <button class="copy-btn" onclick="copyCode()">Nusxalash</button>
+            </div>
+
+            <p class="alert">Ushbu kodni botga yuboring!</p>
+            <button class="close-btn" onclick="window.Telegram.WebApp.close()" style="margin-top:15px; padding:8px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">Ilovani yopish</button>
+        </div>
+    `;
+}
+
+// Nusxalash tugmasi funksiyasi
+function copyCode() {
+    const codeText = document.getElementById("myCode").innerText;
+    navigator.clipboard.writeText(codeText).then(() => {
+        const btn = document.querySelector(".copy-btn");
+        btn.innerText = "Nusxalandi! ✓";
+        btn.style.backgroundColor = "#27ae60";
+        setTimeout(() => {
+            btn.innerText = "Nusxalash";
+            btn.style.backgroundColor = "#1b6d7f";
+        }, 2000);
+    });
+}
+
+    async function sendToBot(){
+        let results={};
+
+        // 1–35 test
+        for(let i=1;i<=35;i++){
+            let el=document.getElementById(`q${i}`);
+            let active=el.querySelector('.active');
+            results[i]=active?active.innerText:"";
+        }
+
+        // 36–45 a va b
+        for(let i=36;i<=45;i++){
+            results[`${i}a`]=document.getElementById(`q${i}a`).value;
+            results[`${i}b`]=document.getElementById(`q${i}b`).value;
+        }
+        const url = "https://test-82a8a-default-rtdb.firebaseio.com/results.json";
+        const res= await fetch("https://raw.githubusercontent.com/UPL-ANIME/bazemath/refs/heads/main/correctanwers");
+        const tj = await res.text();
+        const jt=JSON.parse(tj);
+        let li=[];
+        let cd = "";
+        tg.sendData(JSON.stringify(results));
+        for (
+            let i= -1;
+            i<55;
+            i++){
+               if (jt[i]==results[i+1]){
+                li.push("1");
+                cd+=1;
+               }
+               else{
+                li.push("0");
+                cd+=0;
+               }
+            }
+            const rz=await fetch(url,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify(li)
+            });
+        
+        showResultCard(cd);
+    }
+</script>
+
+</body>
+</html>
