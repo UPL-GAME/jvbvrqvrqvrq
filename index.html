@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mock Test Professional</title>
     
+    <!-- Kerakli kutubxonalar -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
 
@@ -34,151 +35,465 @@
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        h3 { text-align:center;color:var(--primary);margin-bottom:25px;font-size:24px;}
-        .q-row {display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:15px;}
-        .q-num {font-weight:bold;min-width:30px;color:#666;}
-        .options-container {display:flex;flex-wrap:wrap;gap:8px;}
-        .opt-btn {min-width:40px;height:40px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-weight:600;}
-        .opt-btn.active {background:var(--primary);color:white;border-color:var(--primary);transform:scale(1.05);}
-        math-field {width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:#fafafa;font-size:18px;}
-        .submit-btn {width:100%;padding:16px;background:var(--success);color:white;border:none;border-radius:12px;font-size:18px;font-weight:bold;margin-top:30px;}
+        h3 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin-bottom: 25px; 
+            font-size: 24px;
+        }
+        .q-row {
+            display: flex; 
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px solid var(--border); 
+            gap: 15px;
+        }
+        .q-num {
+            font-weight: bold; 
+            min-width: 30px; 
+            color: #666;
+        }
+        .options-container {
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px;
+        }
+        .opt-btn {
+            min-width: 40px; 
+            height: 40px; 
+            border: 2px solid var(--border); 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-weight: 600;
+        }
+        .opt-btn.active {
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary); 
+            transform: scale(1.05);
+        }
+        math-field {
+            width: 100%; 
+            padding: 8px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            background: #fafafa; 
+            font-size: 18px;
+        }
+        .submit-btn {
+            width: 100%; 
+            padding: 16px; 
+            background: var(--success); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-top: 30px; 
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-size: 16px;
+        }
+        .q-text {
+            font-size: 15px;
+            color: #222;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            width: 100%;
+        }
+        .group-title {
+            background: linear-gradient(135deg, #6a3093, #a044ff);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            margin: 15px 0 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h3>Mock Test Javoblarini belgilang</h3>
-    <div id="test-form"></div>
+    <div id="timer" style="text-align: center; color: #e74c3c; font-size: 20px; font-weight: bold; margin-bottom: 20px;"></div>
+    <div id="test-form">
+        <div class="loading">⏳ Savollar yuklanmoqda...</div>
+    </div>
     <button class="submit-btn" onclick="sendToBot()">Javoblarni yuborish</button>
 </div>
 
 <script>
+    // Telegram Web App ulash
     let tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
     const form = document.getElementById('test-form');
 
-    // 1–32 (A B C D)
-    for(let i=1; i<=32; i++) createMCQ(i, ['A','B','C','D']);
+    // ═══════════════════════════════════════════════
+    //  TEST_ID NI OLISH (startapp YOKI ?test_id=)
+    // ═══════════════════════════════════════════════
+    function getTestIdFromUrl() {
+        // 1. Avval URL query dan ?test_id= ni tekshiramiz
+        const params = new URLSearchParams(window.location.search);
+        let testId = params.get('test_id');
 
-    // 33–35 (A B C D E F)
-    for(let i=33; i<=35; i++) createMCQ(i, ['A','B','C','D','E','F']);
+        // 2. Agar topilmasa, Telegram WebApp initDataUnsafe.start_param dan olamiz
+        if (!testId && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+            testId = tg.initDataUnsafe.start_param;
+        }
 
-    // 36–45 (har biri a va b yozma)
-    for(let i=36; i<=45; i++) createDoubleMathInput(i);
+        return testId || '';
+    }
 
+    // ═══════════════════════════════════════════════
+    //  MOCK JSON NI GITHUB DAN YUKLASH
+    // ═══════════════════════════════════════════════
+    async function loadMockJson(testId) {
+        const url = `https://raw.githubusercontent.com/UPL-ANIME/bazemath/refs/heads/main/mock/${testId}.json`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Mock JSON topilmadi: " + testId);
+        return await res.json();
+    }
 
-    function createMCQ(num, options) {
+    // ═══════════════════════════════════════════════
+    //  SAVOLLARNI JSON DAN YARATISH
+    // ═══════════════════════════════════════════════
+    async function renderTest() {
+        const testId = getTestIdFromUrl();
+        if (!testId) {
+            form.innerHTML = '<div class="loading" style="color:red">❌ test_id topilmadi!</div>';
+            return;
+        }
+
+        try {
+            const mock = await loadMockJson(testId);
+            const questions = mock.questions || [];
+
+            form.innerHTML = '';
+
+            for (const q of questions) {
+                if (q.type === "abcd") {
+                    createMCQWithText(q.num, q.text, ["A", "B", "C", "D"], q.options);
+                } else if (q.type === "abcdef_group") {
+                    createGroup(q);
+                } else if (q.type === "open") {
+                    createDoubleMathInput(q.num, q.text, q.sub_a, q.sub_b);
+                }
+            }
+        } catch (e) {
+            form.innerHTML = `<div class="loading" style="color:red">❌ Xatolik: ${e.message}</div>`;
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  VARIANTLI TEST (ABCD)
+    // ═══════════════════════════════════════════════
+    function createMCQWithText(num, text, options, optValues) {
         let div = document.createElement('div');
-        div.className='q-row';
-        let html=`<span class="q-num">${num}.</span><div class="options-container" id="q${num}">`;
-        options.forEach(opt=>{
-            html+=`<button class="opt-btn" onclick="selectOpt(this,${num})">${opt}</button>`;
+        div.className = 'q-row';
+        div.style.flexDirection = 'column';
+        div.style.alignItems = 'flex-start';
+
+        let html = `<div class="q-text"><b>${num}.</b> ${text}</div>`;
+        html += `<div class="options-container" id="q${num}">`;
+        options.forEach(opt => {
+            const val = optValues ? (optValues[opt] || '') : opt;
+            html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,${num})" title="${val}">${opt}</button>`;
         });
-        html+=`</div>`;
-        div.innerHTML=html;
+        html += `</div>`;
+        div.innerHTML = html;
         form.appendChild(div);
     }
 
-    function selectOpt(btn,num){
-        let parent=document.getElementById(`q${num}`);
-        Array.from(parent.children).forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
+    // ═══════════════════════════════════════════════
+    //  33-35 MOSLASHTIRISH GURUHI
+    // ═══════════════════════════════════════════════
+    function createGroup(q) {
+        let div = document.createElement('div');
+        div.className = 'q-row';
+        div.style.flexDirection = 'column';
+        div.style.alignItems = 'flex-start';
+
+        let html = `<div class="group-title">🔗 33–35. Moslashtirish topshirig'i</div>`;
+        html += `<div class="q-text"><b>33.</b> ${q.sub33 || ''}</div>`;
+        html += `<div class="options-container" id="q33">`;
+        ["A","B","C","D","E","F"].forEach(opt => {
+            html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,33)">${opt}</button>`;
+        });
+        html += `</div>`;
+
+        html += `<div class="q-text" style="margin-top:10px"><b>34.</b> ${q.sub34 || ''}</div>`;
+        html += `<div class="options-container" id="q34">`;
+        ["A","B","C","D","E","F"].forEach(opt => {
+            html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,34)">${opt}</button>`;
+        });
+        html += `</div>`;
+
+        html += `<div class="q-text" style="margin-top:10px"><b>35.</b> ${q.sub35 || ''}</div>`;
+        html += `<div class="options-container" id="q35">`;
+        ["A","B","C","D","E","F"].forEach(opt => {
+            html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,35)">${opt}</button>`;
+        });
+        html += `</div>`;
+
+        div.innerHTML = html;
+        form.appendChild(div);
     }
 
-    function createDoubleMathInput(num){
-        let div=document.createElement('div');
-        div.className='q-row';
-        div.style.flexDirection='column';
-        div.innerHTML=`
-            <span class="q-num">${num}. a) Javob:</span>
+    // ═══════════════════════════════════════════════
+    //  YOZMA TEST (a va b)
+    // ═══════════════════════════════════════════════
+    function createDoubleMathInput(num, text, subA, subB) {
+        let div = document.createElement('div');
+        div.className = 'q-row';
+        div.style.flexDirection = 'column';
+        div.innerHTML = `
+            <div class="q-text"><b>${num}.</b> ${text || ''}</div>
+            <span class="q-num" style="align-self:flex-start;">${num}. a) ${subA || 'Javob:'}</span>
             <math-field id="q${num}a" virtual-keyboard-mode="onfocus"></math-field>
-            <span class="q-num">${num}. b) Javob:</span>
+            <span class="q-num" style="align-self:flex-start;">${num}. b) ${subB || 'Javob:'}</span>
             <math-field id="q${num}b" virtual-keyboard-mode="onfocus"></math-field>`;
         form.appendChild(div);
     }
 
-function showResultCard(codeText) {
-    // 010101... zanjirini BigInt yordamida Base36 (harf va raqamlar) formatiga siqamiz
-    // Oldiga '1' qo'shamiz, aks holda boshidagi nollar (000...) o'chib ketadi
-    const binaryWithPrefix = '1' + codeText;
-    const compressedCode = BigInt('0b' + binaryWithPrefix).toString(36); 
+    // ═══════════════════════════════════════════════
+    //  VARIANTNI TANLASH
+    // ═══════════════════════════════════════════════
+    function selectOpt(btn, num){
+        let parent = document.getElementById(`q${num}`);
+        Array.from(parent.children).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
 
-    document.body.innerHTML = `
-        <div class="card">
-            <div class="icon">🔑</div>
-            <h1>Sizning Shaxsiy Kodingiz</h1>
-            
-            <div class="code-box">
-                <!-- Ekranda juda qisqa kod ko'rinadi (Masalan: "k3f8g2m9p1") -->
-                <span class="code-text" id="myCode">${compressedCode}</span>
-                <button class="copy-btn" onclick="copyCode()">Nusxalash</button>
+    // ═══════════════════════════════════════════════
+    //  NATIJA KARTASI
+    // ═══════════════════════════════════════════════
+    function showResultCard(codeText) {
+        const binaryWithPrefix = '1' + codeText;
+        const compressedCode = BigInt('0b' + binaryWithPrefix).toString(36); 
+
+        document.body.innerHTML = `
+            <style>
+              .card {
+                background: #ffffff;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                max-width: 350px;
+                margin: 50px auto;
+                text-align: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              }
+              .icon { font-size: 40px; margin-bottom: 10px; }
+              .card h1 { font-size: 20px; color: #2f3640; margin-bottom: 20px; }
+              .code-box {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #f1f2f6;
+                padding: 10px 15px;
+                border-radius: 8px;
+                border: 1px solid #dcdde1;
+                margin-bottom: 15px;
+              }
+              .code-text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 180px;
+                font-family: monospace;
+                font-size: 15px;
+                font-weight: bold;
+                color: #2f3640;
+              }
+              .copy-btn {
+                background: #4cd137;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                flex-shrink: 0;
+                margin-left: 8px;
+              }
+              .copy-btn:hover { background: #44bd32; }
+              .alert { font-size: 14px; color: #718093; margin-bottom: 0; }
+              .close-btn {
+                width: 100%;
+                margin-top: 15px;
+                padding: 10px;
+                background: #e74c3c;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+                cursor: pointer;
+              }
+              .close-btn:hover { background: #c0392b; }
+            </style>
+
+            <div class="card">
+                <div class="icon">🔑</div>
+                <h1>Sizning Shaxsiy Kodingiz</h1>
+                <div class="code-box">
+                    <span class="code-text" id="myCode">${compressedCode}</span>
+                    <button class="copy-btn" onclick="copyCode()">Nusxalash</button>
+                </div>
+                <p class="alert">Ushbu kodni botga yuboring!</p>
+                <button class="close-btn" onclick="window.Telegram.WebApp.close()">Ilovani yopish</button>
             </div>
+        `;
+    }
 
-            <p class="alert">Ushbu kodni botga yuboring!</p>
-            <button class="close-btn" onclick="window.Telegram.WebApp.close()" style="margin-top:15px; padding:8px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">Ilovani yopish</button>
-        </div>
-    `;
-}
+    function copyCode() {
+        const codeText = document.getElementById("myCode").innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+            const btn = document.querySelector(".copy-btn");
+            btn.innerText = "Nusxalandi! ✓";
+            btn.style.backgroundColor = "#27ae60";
+            setTimeout(() => {
+                btn.innerText = "Nusxalash";
+                btn.style.backgroundColor = "#4cd137"; 
+            }, 2000);
+        });
+    }
 
-// Nusxalash tugmasi funksiyasi
-function copyCode() {
-    const codeText = document.getElementById("myCode").innerText;
-    navigator.clipboard.writeText(codeText).then(() => {
-        const btn = document.querySelector(".copy-btn");
-        btn.innerText = "Nusxalandi! ✓";
-        btn.style.backgroundColor = "#27ae60";
-        setTimeout(() => {
-            btn.innerText = "Nusxalash";
-            btn.style.backgroundColor = "#1b6d7f";
-        }, 2000);
-    });
-}
-
+    // ═══════════════════════════════════════════════
+    //  JAVOBLARNI YUBORISH
+    // ═══════════════════════════════════════════════
     async function sendToBot(){
-        let results={};
+        let results = {};
 
-        // 1–35 test
-        for(let i=1;i<=35;i++){
-            let el=document.getElementById(`q${i}`);
-            let active=el.querySelector('.active');
-            results[i]=active?active.innerText:"";
+        for(let i = 1; i <= 35; i++){
+            let el = document.getElementById(`q${i}`);
+            if (!el) continue;
+            let active = el.querySelector('.active');
+            results[i] = active ? active.getAttribute('data-opt') : "";
         }
 
-        // 36–45 a va b
-        for(let i=36;i<=45;i++){
-            results[`${i}a`]=document.getElementById(`q${i}a`).value;
-            results[`${i}b`]=document.getElementById(`q${i}b`).value;
+        for(let i = 36; i <= 45; i++){
+            let elA = document.getElementById(`q${i}a`);
+            let elB = document.getElementById(`q${i}b`);
+            if (!elA || !elB) continue;
+            let valA = elA.value;
+            let valB = elB.value;
+            results[`${i}a`] = valA ? valA.trim() : "";
+            results[`${i}b`] = valB ? valB.trim() : "";
         }
+
         const url = "https://test-82a8a-default-rtdb.firebaseio.com/results.json";
-        const res= await fetch("https://raw.githubusercontent.com/UPL-ANIME/bazemath/refs/heads/main/correctanwers");
-        const tj = await res.text();
-        const jt=JSON.parse(tj);
-        let li=[];
-        let cd = "";
-        tg.sendData(JSON.stringify(results));
-        for (
-            let i= -1;
-            i<55;
-            i++){
-               if (jt[i]==results[i+1]){
-                li.push("1");
-                cd+=1;
-               }
-               else{
-                li.push("0");
-                cd+=0;
-               }
+        
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/UPL-ANIME/bazemath/refs/heads/main/correctanwers");
+            const tj = await res.text();
+            const jt = JSON.parse(tj);
+            
+            let li = [];
+            let cd = "";
+            
+            let keySequence = [];
+            for (let i = 1; i <= 35; i++) keySequence.push(i.toString());
+            for (let i = 36; i <= 45; i++) {
+                keySequence.push(`${i}a`);
+                keySequence.push(`${i}b`);
             }
-            const rz=await fetch(url,{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
+
+            keySequence.forEach((key, index) => {
+                let userAns = results[key];
+                let correctAns = (jt[key] !== undefined) ? jt[key] : jt[index + 1];
+
+                if (userAns && userAns !== "" && String(correctAns).trim() === String(userAns).trim()) {
+                    li.push("1");
+                    cd += "1";
+                } else {
+                    li.push("0");
+                    cd += "0";
+                }
+            });
+            
+            await fetch(url, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(li)
             });
-        
-        showResultCard(cd);
+            
+            showResultCard(cd);
+            
+        } catch (error) {
+            alert("Xatolik yuz berdi: " + error.message);
+        }
     }
+
+    // ═══════════════════════════════════════════════
+    //  TAYMER
+    // ═══════════════════════════════════════════════
+    let deadline = null;
+    let timerInterval = null;
+    let isInitialCheck = true;
+
+    async function fetchTimeAndStartTimer() {
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/UPL-ANIME/bazemath/refs/heads/main/time");
+            const timeText = await res.text();
+            let timeString = timeText.trim();
+            
+            if (/^\d+$/.test(timeString)) {
+                deadline = parseInt(timeString);
+                if (timeString.length === 10) deadline *= 1000;
+            } else {
+                deadline = new Date(timeString).getTime();
+            }
+            
+            if (!isNaN(deadline)) {
+                checkTime();
+                timerInterval = setInterval(checkTime, 1000);
+            }
+        } catch (error) {
+            console.error("Vaqtni yuklashda xatolik:", error);
+        }
+    }
+
+    function checkTime() {
+        if (!deadline) return;
+        const now = new Date().getTime();
+        const distance = deadline - now;
+        const timerEl = document.getElementById("timer");
+
+        if (distance <= 0) {
+            clearInterval(timerInterval);
+            if (isInitialCheck) {
+                document.body.innerHTML = `<div class="container"><h3 style="color:red">Test ishlash vaqti tugagan! Testni ishlash imkonsiz.</h3></div>`;
+            } else {
+                if (timerEl) timerEl.innerHTML = "Vaqt tugadi! Javoblar avtomatik yuborilmoqda...";
+                sendToBot();
+            }
+        } else {
+            isInitialCheck = false;
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (timerEl) {
+                timerEl.innerHTML = `Qolgan vaqt: ${hours > 0 ? hours + ':' : ''}${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  ISHGA TUSHIRISH
+    // ═══════════════════════════════════════════════
+    renderTest();
+    fetchTimeAndStartTimer();
 </script>
 
 </body>
