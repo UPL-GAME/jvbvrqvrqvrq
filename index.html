@@ -8,50 +8,169 @@
     <!-- Kerakli kutubxonalar -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']],
+                processEscapes: true
+            },
+            svg: { fontCache: 'global' },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 
     <style>
         :root {
-            --primary: #248bcf;
+            --bg: #EEF1F6;
+            --bg-grid: rgba(30, 76, 138, 0.035);
+            --card-bg: #FFFFFF;
+            --text: #1C2430;
+            --text-muted: #647089;
+            --primary: #1E4C8A;
+            --primary-dark: #143968;
+            --primary-soft: rgba(30, 76, 138, 0.10);
+            --accent: #B8842E;
             --success: #28a745;
-            --bg: #f0f2f5;
-            --card-bg: #ffffff;
-            --text: #333;
-            --border: #e0e0e0;
+            --success-dark: #1f8438;
+            --danger: #C1443A;
+            --danger-soft: rgba(193, 68, 58, 0.12);
+            --border: #DCE2EC;
+            --shadow: rgba(28, 36, 48, 0.10);
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            color-scheme: light;
         }
+        html[data-theme="dark"] {
+            --bg: #0E1420;
+            --bg-grid: rgba(111, 160, 232, 0.05);
+            --card-bg: #171F2C;
+            --text: #E7ECF5;
+            --text-muted: #8D96A8;
+            --primary: #6FA0E8;
+            --primary-dark: #4C7DC7;
+            --primary-soft: rgba(111, 160, 232, 0.14);
+            --accent: #E0AC55;
+            --success: #3fb768;
+            --success-dark: #2f8f50;
+            --danger: #E1685C;
+            --danger-soft: rgba(225, 104, 92, 0.16);
+            --border: #2A3446;
+            --shadow: rgba(0, 0, 0, 0.45);
+            color-scheme: dark;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
             color: var(--text);
             margin: 0;
-            padding: 20px 10px;
+            padding: 24px 10px 60px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.35s ease, color 0.35s ease;
         }
         .container {
             width: 100%;
             max-width: 600px;
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 26px 25px 30px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: 0 16px 40px var(--shadow);
+            animation: riseIn 0.5s cubic-bezier(.2,.8,.2,1) both;
+            transition: background-color 0.35s ease, border-color 0.35s ease;
+        }
+        .app-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2px;
+        }
+        .theme-switch { display: inline-flex; cursor: pointer; }
+        .theme-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .theme-switch-track {
+            position: relative;
+            width: 56px;
+            height: 30px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 7px;
+            transition: background-color 0.3s ease;
+        }
+        .ts-icon { font-size: 13px; line-height: 1; position: relative; z-index: 1; opacity: 0.85; }
+        .theme-switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: 0 2px 6px var(--shadow);
+            z-index: 2;
+            transition: transform 0.32s cubic-bezier(.2,.8,.2,1);
+        }
+        .theme-switch input:checked ~ .theme-switch-track .theme-switch-thumb {
+            transform: translateX(26px);
         }
         h3 { 
             text-align: center; 
             color: var(--primary); 
-            margin-bottom: 25px; 
-            font-size: 24px;
+            margin: 6px 0 24px;
+            font-size: 23px;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 14px;
+        }
+        h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .timer {
+            text-align: center;
+            color: var(--danger);
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px 14px;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            border-radius: var(--radius-md);
+            animation: pulseRing 2.4s ease-in-out infinite;
         }
         .q-row {
             display: flex; 
             align-items: center; 
-            padding: 12px 0; 
+            padding: 14px 0; 
             border-bottom: 1px solid var(--border); 
             gap: 15px;
+            animation: fadeSlideIn 0.4s ease both;
         }
         .q-num {
             font-weight: bold; 
             min-width: 30px; 
-            color: #666;
+            color: var(--text-muted);
         }
         .options-container {
             display: flex; 
@@ -59,72 +178,150 @@
             gap: 8px;
         }
         .opt-btn {
-            min-width: 40px; 
-            height: 40px; 
+            min-width: 42px; 
+            height: 42px; 
             border: 2px solid var(--border); 
-            border-radius: 8px; 
-            background: white; 
+            border-radius: var(--radius-sm); 
+            background: var(--bg); 
+            color: var(--text);
             cursor: pointer; 
             font-weight: 600;
+            font-size: 15px;
+            transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
         }
+        .opt-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .opt-btn:active { transform: translateY(0) scale(0.96); }
         .opt-btn.active {
             background: var(--primary); 
             color: white; 
             border-color: var(--primary); 
-            transform: scale(1.05);
+            box-shadow: 0 6px 14px var(--primary-soft);
+            animation: popIn 0.25s ease;
         }
         math-field {
             width: 100%; 
             padding: 8px; 
-            border-radius: 8px; 
+            border-radius: var(--radius-sm); 
             border: 1px solid var(--border); 
-            background: #fafafa; 
+            background: var(--bg); 
+            color: var(--text);
             font-size: 18px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        math-field:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
         }
         .submit-btn {
             width: 100%; 
             padding: 16px; 
-            background: var(--success); 
+            background: linear-gradient(135deg, var(--success), var(--success-dark)); 
             color: white; 
             border: none; 
-            border-radius: 12px; 
+            border-radius: var(--radius-md); 
             font-size: 18px; 
             font-weight: bold; 
             margin-top: 30px; 
             cursor: pointer;
+            box-shadow: 0 10px 24px var(--shadow);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
         }
         .submit-btn:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
         }
+        .submit-btn:active { transform: translateY(0) scale(0.98); }
         .loading {
             text-align: center;
-            color: #666;
-            padding: 20px;
+            color: var(--text-muted);
+            padding: 26px 20px;
             font-size: 16px;
         }
         .q-text {
             font-size: 15px;
-            color: #222;
+            color: var(--text);
             margin-bottom: 8px;
             line-height: 1.5;
             width: 100%;
         }
         .group-title {
-            background: linear-gradient(135deg, #6a3093, #a044ff);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: #fff;
             padding: 8px 14px;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             font-size: 14px;
             font-weight: 700;
             margin: 15px 0 10px;
+        }
+        .lock-screen {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeSlideIn 0.4s ease both;
+        }
+        .lock-screen .icon {
+            font-size: 58px;
+            margin-bottom: 20px;
+            animation: bounceIn 0.5s cubic-bezier(.3,1.6,.6,1) both;
+        }
+        .lock-screen h2 {
+            color: var(--danger);
+            margin-bottom: 15px;
+            font-family: Georgia, 'Times New Roman', serif;
+        }
+        .lock-screen p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.85); }
+            60% { transform: scale(1.08); }
+            100% { transform: scale(1.05); }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.4); }
+            60% { opacity: 1; transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        @keyframes pulseRing {
+            0%, 100% { box-shadow: 0 0 0 0 var(--danger-soft); }
+            50% { box-shadow: 0 0 0 8px transparent; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="app-header">
+        <label class="theme-switch" title="Tun / Kun rejimi">
+            <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+            <span class="theme-switch-track">
+                <span class="ts-icon ts-sun">☀️</span>
+                <span class="ts-icon ts-moon">🌙</span>
+                <span class="theme-switch-thumb"></span>
+            </span>
+        </label>
+    </div>
     <h3>Mock Test Javoblarini belgilang</h3>
-    <div id="timer" style="text-align: center; color: #e74c3c; font-size: 20px; font-weight: bold; margin-bottom: 20px;"></div>
+    <div id="timer" class="timer"></div>
     <div id="test-form">
         <div class="loading">⏳ Savollar yuklanmoqda...</div>
     </div>
@@ -137,22 +334,100 @@
     tg.ready();
     tg.expand();
 
+    // ═══════════════════════════════════════════════
+    //  TUN / KUN REJIMI (faqat dizayn uchun)
+    // ═══════════════════════════════════════════════
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        const toggle = document.getElementById('themeToggle');
+        if (toggle) toggle.checked = (theme === 'dark');
+    }
+    function toggleTheme() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        try { localStorage.setItem('mock_theme_mode', next); } catch (e) {}
+        applyTheme(next);
+    }
+    (function initTheme() {
+        let saved = null;
+        try { saved = localStorage.getItem('mock_theme_mode'); } catch (e) {}
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+    })();
+
     const form = document.getElementById('test-form');
 
     // ═══════════════════════════════════════════════
-    //  TEST_ID NI OLISH (startapp YOKI ?test_id=)
+    //  FOYDALANUVCHI ID OLISH
+    // ═══════════════════════════════════════════════
+    function getUserId() {
+        try {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                return String(tg.initDataUnsafe.user.id);
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    // ═══════════════════════════════════════════════
+    //  TEST_ID OLISH (startapp YOKI ?test_id=)
     // ═══════════════════════════════════════════════
     function getTestIdFromUrl() {
-        // 1. Avval URL query dan ?test_id= ni tekshiramiz
         const params = new URLSearchParams(window.location.search);
         let testId = params.get('test_id');
 
-        // 2. Agar topilmasa, Telegram WebApp initDataUnsafe.start_param dan olamiz
         if (!testId && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
             testId = tg.initDataUnsafe.start_param;
         }
 
         return testId || '';
+    }
+
+    // ═══════════════════════════════════════════════
+    //  LOCK TEKSHIRUVI (har bir foydalanuvchi bir marta)
+    // ═══════════════════════════════════════════════
+    function checkLock(testId, userId) {
+        if (!userId) return { locked: false };
+        
+        const lockKey = `mock_lock_${testId}_${userId}`;
+        const existing = localStorage.getItem(lockKey);
+        
+        if (existing) {
+            return { locked: true, savedAt: existing };
+        }
+        return { locked: false, lockKey: lockKey };
+    }
+
+    function setLock(lockKey, code) {
+        if (!lockKey) return;
+        localStorage.setItem(lockKey, JSON.stringify({
+            code: code,
+            time: new Date().toISOString()
+        }));
+    }
+
+    // ═══════════════════════════════════════════════
+    //  LOCK EKRANI
+    // ═══════════════════════════════════════════════
+    function showLockScreen(savedData) {
+        let info = "";
+        try {
+            const parsed = JSON.parse(savedData);
+            if (parsed.time) {
+                info = `<p>Siz bu testni <b>${new Date(parsed.time).toLocaleString('uz-UZ')}</b> da yechgansiz.</p>`;
+            }
+        } catch(e) {}
+
+        document.querySelector('.container').innerHTML = `
+            <div class="lock-screen">
+                <div class="icon">🔒</div>
+                <h2>Test allaqachon yechilgan!</h2>
+                <p>Siz bu testni faqat <b>bir marta</b> yechishingiz mumkin.</p>
+                ${info}
+                <button class="submit-btn" onclick="window.Telegram.WebApp.close()" style="background:#e74c3c; margin-top:20px;">Ilovani yopish</button>
+            </div>
+        `;
+        document.getElementById('timer').innerHTML = "";
     }
 
     // ═══════════════════════════════════════════════
@@ -170,8 +445,17 @@
     // ═══════════════════════════════════════════════
     async function renderTest() {
         const testId = getTestIdFromUrl();
+        const userId = getUserId();
+
         if (!testId) {
             form.innerHTML = '<div class="loading" style="color:red">❌ test_id topilmadi!</div>';
+            return;
+        }
+
+        // Lock tekshiruvi
+        const lock = checkLock(testId, userId);
+        if (lock.locked) {
+            showLockScreen(lock.savedAt);
             return;
         }
 
@@ -190,6 +474,14 @@
                     createDoubleMathInput(q.num, q.text, q.sub_a, q.sub_b);
                 }
             }
+
+            // MathJax ni qayta ishga tushirish
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch(err => console.log('MathJax xato:', err));
+            } else if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset();
+            }
+
         } catch (e) {
             form.innerHTML = `<div class="loading" style="color:red">❌ Xatolik: ${e.message}</div>`;
         }
@@ -213,6 +505,13 @@
         html += `</div>`;
         div.innerHTML = html;
         form.appendChild(div);
+
+        // Har bir savol uchun MathJax ni qayta ishga tushirish
+        setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([div]).catch(() => {});
+            }
+        }, 50);
     }
 
     // ═══════════════════════════════════════════════
@@ -248,6 +547,12 @@
 
         div.innerHTML = html;
         form.appendChild(div);
+
+        setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([div]).catch(() => {});
+            }
+        }, 50);
     }
 
     // ═══════════════════════════════════════════════
@@ -264,6 +569,12 @@
             <span class="q-num" style="align-self:flex-start;">${num}. b) ${subB || 'Javob:'}</span>
             <math-field id="q${num}b" virtual-keyboard-mode="onfocus"></math-field>`;
         form.appendChild(div);
+
+        setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([div]).catch(() => {});
+            }
+        }, 50);
     }
 
     // ═══════════════════════════════════════════════
@@ -284,26 +595,30 @@
 
         document.body.innerHTML = `
             <style>
+              body { background: var(--bg); }
               .card {
-                background: #ffffff;
-                padding: 25px;
-                border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                background: var(--card-bg);
+                padding: 28px 26px;
+                border-radius: var(--radius-lg);
+                box-shadow: 0 16px 40px var(--shadow);
+                border: 1px solid var(--border);
                 max-width: 350px;
-                margin: 50px auto;
+                margin: 55px auto;
                 text-align: center;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: var(--text);
+                animation: riseIn 0.5s cubic-bezier(.2,.8,.2,1) both;
               }
-              .icon { font-size: 40px; margin-bottom: 10px; }
-              .card h1 { font-size: 20px; color: #2f3640; margin-bottom: 20px; }
+              .icon { font-size: 42px; margin-bottom: 10px; }
+              .card h1 { font-size: 20px; color: var(--text); margin-bottom: 20px; font-family: Georgia, 'Times New Roman', serif; }
               .code-box {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                background: #f1f2f6;
+                background: var(--bg);
                 padding: 10px 15px;
-                border-radius: 8px;
-                border: 1px solid #dcdde1;
+                border-radius: var(--radius-md);
+                border: 1px solid var(--border);
                 margin-bottom: 15px;
               }
               .code-text {
@@ -311,36 +626,39 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 max-width: 180px;
-                font-family: monospace;
+                font-family: 'Courier New', monospace;
                 font-size: 15px;
                 font-weight: bold;
-                color: #2f3640;
+                color: var(--text);
+                letter-spacing: 0.5px;
               }
               .copy-btn {
                 background: #4cd137;
                 color: white;
                 border: none;
                 padding: 6px 12px;
-                border-radius: 4px;
+                border-radius: var(--radius-sm);
                 cursor: pointer;
                 font-weight: bold;
                 flex-shrink: 0;
                 margin-left: 8px;
+                transition: transform 0.15s ease, background-color 0.2s ease;
               }
-              .copy-btn:hover { background: #44bd32; }
-              .alert { font-size: 14px; color: #718093; margin-bottom: 0; }
+              .copy-btn:hover { background: #44bd32; transform: translateY(-1px); }
+              .alert { font-size: 14px; color: var(--text-muted); margin-bottom: 0; }
               .close-btn {
                 width: 100%;
                 margin-top: 15px;
                 padding: 10px;
-                background: #e74c3c;
+                background: var(--danger);
                 color: white;
                 border: none;
-                border-radius: 5px;
+                border-radius: var(--radius-sm);
                 font-weight: bold;
                 cursor: pointer;
+                transition: transform 0.15s ease, opacity 0.2s ease;
               }
-              .close-btn:hover { background: #c0392b; }
+              .close-btn:hover { opacity: 0.9; transform: translateY(-1px); }
             </style>
 
             <div class="card">
@@ -373,6 +691,9 @@
     //  JAVOBLARNI YUBORISH
     // ═══════════════════════════════════════════════
     async function sendToBot(){
+        const testId = getTestIdFromUrl();
+        const userId = getUserId();
+
         let results = {};
 
         for(let i = 1; i <= 35; i++){
@@ -422,11 +743,24 @@
                 }
             });
             
+            // Firebase ga natija + user_id + test_id yozish
             await fetch(url, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(li)
+                body: JSON.stringify({
+                    user_id: userId,
+                    test_id: testId,
+                    answers: li,
+                    code: cd,
+                    time: new Date().toISOString()
+                })
             });
+
+            // Lock ni saqlash
+            const lock = checkLock(testId, userId);
+            if (lock.lockKey) {
+                setLock(lock.lockKey, cd);
+            }
             
             showResultCard(cd);
             
