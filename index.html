@@ -25,148 +25,671 @@
 
     <style>
         :root {
-            --primary: #248bcf;
-            --success: #28a745;
-            --bg: #f0f2f5;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text: #333;
-            --border: #e0e0e0;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
         }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
             color: var(--text);
             margin: 0;
-            padding: 20px 10px;
+            padding: 16px 8px 40px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  HEADER */
+        /* ═══════════════════════════════════════════════ */
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            color: #fff;
+            padding: 28px 24px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: shine 10s linear infinite;
+        }
+
+        @keyframes shine {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 6px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.3px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  TIMER */
+        /* ═══════════════════════════════════════════════ */
+        .timer-wrapper {
+            padding: 16px 24px 0;
             display: flex;
             justify-content: center;
         }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        h3 { 
-            text-align: center; 
-            color: var(--primary); 
-            margin-bottom: 25px; 
-            font-size: 24px;
-        }
-        .q-row {
-            display: flex; 
-            align-items: center; 
-            padding: 12px 0; 
-            border-bottom: 1px solid var(--border); 
-            gap: 15px;
-        }
-        .q-num {
-            font-weight: bold; 
-            min-width: 30px; 
-            color: #666;
-        }
-        .options-container {
-            display: flex; 
-            flex-wrap: wrap; 
+
+        .timer {
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+            border: 1px solid #fcd34d;
+            font-variant-numeric: tabular-nums;
         }
-        .opt-btn {
-            min-width: 40px; 
-            height: 40px; 
-            border: 2px solid var(--border); 
-            border-radius: 8px; 
-            background: white; 
-            cursor: pointer; 
-            font-weight: 600;
-        }
-        .opt-btn.active {
-            background: var(--primary); 
-            color: white; 
-            border-color: var(--primary); 
-            transform: scale(1.05);
-        }
-        math-field {
-            width: 100%; 
-            padding: 8px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border); 
-            background: #fafafa; 
+
+        .timer-icon {
             font-size: 18px;
         }
-        .submit-btn {
-            width: 100%; 
-            padding: 16px; 
-            background: var(--success); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            margin-top: 30px; 
-            cursor: pointer;
+
+        .timer.danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border-color: #fca5a5;
+            animation: pulse 1s ease infinite;
         }
-        .submit-btn:hover {
-            opacity: 0.9;
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            font-size: 16px;
+
+        /* ═══════════════════════════════════════════════ */
+        /*  TEST FORM */
+        /* ═══════════════════════════════════════════════ */
+        .test-form {
+            padding: 20px 16px;
         }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  QUESTION CARD */
+        /* ═══════════════════════════════════════════════ */
+        .q-card {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 18px 16px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            animation: slideIn 0.35s ease backwards;
+        }
+
+        .q-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .q-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .q-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+        }
+
         .q-text {
             font-size: 15px;
-            color: #222;
-            margin-bottom: 8px;
-            line-height: 1.5;
-            width: 100%;
+            color: var(--text);
+            line-height: 1.6;
+            flex: 1;
+            padding-top: 4px;
+            word-wrap: break-word;
         }
-        .group-title {
-            background: linear-gradient(135deg, #6a3093, #a044ff);
+
+        /* ═══════════════════════════════════════════════ */
+        /*  IMAGE LINK (ChatGPT havolasi) */
+        /* ═══════════════════════════════════════════════ */
+        .q-image-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0 12px 44px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border: 1.5px solid #a5b4fc;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .q-image-link:hover {
+            background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .q-image-link:active {
+            transform: translateY(0);
+        }
+
+        .q-image-link .icon {
+            font-size: 16px;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  OPTIONS */
+        /* ═══════════════════════════════════════════════ */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-left: 44px;
+        }
+
+        .options-container.six {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            user-select: none;
+        }
+
+        .opt-btn:hover {
+            border-color: var(--primary-light);
+            background: #f5f3ff;
+        }
+
+        .opt-btn:active {
+            transform: scale(0.97);
+        }
+
+        .opt-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: #fff;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 14px;
+            border-color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+            transform: scale(1.03);
+        }
+
+        .opt-btn.active::before {
+            content: "✓ ";
+            margin-right: 2px;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  GROUP (33-35 moslashtirish) */
+        /* ═══════════════════════════════════════════════ */
+        .group-card {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border: 1.5px solid #d8b4fe;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            animation: slideIn 0.35s ease backwards;
+        }
+
+        .group-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
             font-weight: 700;
-            margin: 15px 0 10px;
+            margin-bottom: 14px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
         }
-        .q-image {
-            max-width: 100%;
-            margin: 10px 0;
-            border: 1px solid #e0e0e0;
+
+        .sub-q {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .sub-q-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .sub-q-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 26px;
+            background: var(--primary);
+            color: #fff;
             border-radius: 8px;
-            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
         }
-        .lock-screen {
+
+        .sub-q-text {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .sub-q .options-container {
+            margin-left: 34px;
+            margin-top: 8px;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  OPEN QUESTION (yozma) */
+        /* ═══════════════════════════════════════════════ */
+        .open-input {
+            margin-left: 44px;
+            margin-top: 6px;
+        }
+
+        .open-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            margin-top: 10px;
+        }
+
+        math-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #f8fafc;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+
+        math-field:focus-within {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  SUBMIT BUTTON */
+        /* ═══════════════════════════════════════════════ */
+        .submit-wrapper {
+            padding: 8px 16px 24px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .submit-btn::after {
+            content: "→";
+            font-size: 18px;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  LOADING */
+        /* ═══════════════════════════════════════════════ */
+        .loading {
             text-align: center;
             padding: 40px 20px;
+            color: var(--text-light);
         }
+
+        .loading .spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  LOCK SCREEN */
+        /* ═══════════════════════════════════════════════ */
+        .lock-screen {
+            text-align: center;
+            padding: 60px 24px;
+        }
+
         .lock-screen .icon {
-            font-size: 60px;
+            font-size: 72px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: shake 0.6s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .lock-screen h2 {
+            color: var(--danger);
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .lock-screen p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.6;
             margin-bottom: 20px;
         }
-        .lock-screen h2 {
-            color: #e74c3c;
-            margin-bottom: 15px;
-        }
-        .lock-screen p {
-            color: #666;
+
+        .lock-screen .btn-close {
+            padding: 12px 28px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
             font-size: 15px;
-            line-height: 1.6;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  RESULT CARD (kod ko'rsatiladi) */
+        /* ═══════════════════════════════════════════════ */
+        .result-card {
+            background: #fff;
+            padding: 28px 24px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            max-width: 380px;
+            margin: 60px auto;
+            text-align: center;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .result-card .icon {
+            font-size: 52px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: bounce 2s ease infinite;
+        }
+
+        .result-card h1 {
+            font-size: 20px;
+            color: var(--text);
+            margin: 0 0 20px;
+            font-weight: 700;
+        }
+
+        .code-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1.5px dashed #cbd5e1;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .code-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            font-family: 'SF Mono', Menlo, monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            text-align: left;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .result-card .alert {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .result-card .close-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .result-card .close-btn:hover {
+            background: #dc2626;
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  RESPONSIVE */
+        /* ═══════════════════════════════════════════════ */
+        @media (max-width: 480px) {
+            body { padding: 8px 4px 24px; }
+            .container { border-radius: 20px; }
+            .header { padding: 22px 18px 20px; }
+            .header h1 { font-size: 19px; }
+            .header-icon { font-size: 34px; }
+            .test-form { padding: 16px 12px; }
+            .q-card { padding: 16px 14px 14px; border-radius: 14px; }
+            .q-text { font-size: 14px; }
+            .options-container { grid-template-columns: 1fr; }
+            .options-container.six { grid-template-columns: 1fr 1fr; }
+            .q-image-link { margin-left: 0; }
+            .options-container { margin-left: 0; }
+            .open-input { margin-left: 0; }
+            .sub-q .options-container { margin-left: 0; }
+            .submit-wrapper { padding: 8px 12px 20px; }
+        }
+
+        /* ═══════════════════════════════════════════════ */
+        /*  PRINT */
+        /* ═══════════════════════════════════════════════ */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; }
+            .submit-wrapper { display: none; }
+            .q-card { break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h3>Mock Test Javoblarini belgilang</h3>
-    <div id="timer" style="text-align: center; color: #e74c3c; font-size: 20px; font-weight: bold; margin-bottom: 20px;"></div>
-    <div id="test-form">
-        <div class="loading">⏳ Savollar yuklanmoqda...</div>
+<div class="container" id="mainContainer">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-icon">📘</div>
+        <h1>Mock Test</h1>
+        <p>Javoblarni belgilang va yuboring</p>
     </div>
-    <button class="submit-btn" onclick="sendToBot()">Javoblarni yuborish</button>
+
+    <!-- TIMER -->
+    <div class="timer-wrapper">
+        <div class="timer" id="timer">
+            <span class="timer-icon">⏱</span>
+            <span id="timerText">Yuklanmoqda...</span>
+        </div>
+    </div>
+
+    <!-- TEST FORM -->
+    <div class="test-form" id="test-form">
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>Savollar yuklanmoqda...</div>
+        </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-wrapper">
+        <button class="submit-btn" onclick="sendToBot()">Javoblarni yuborish</button>
+    </div>
 </div>
 
 <script>
@@ -176,6 +699,7 @@
     tg.expand();
 
     const form = document.getElementById('test-form');
+    const mainContainer = document.getElementById('mainContainer');
 
     // ═══════════════════════════════════════════════
     //  FOYDALANUVCHI ID OLISH
@@ -238,16 +762,17 @@
             }
         } catch(e) {}
 
-        document.querySelector('.container').innerHTML = `
-            <div class="lock-screen">
-                <div class="icon">🔒</div>
-                <h2>Test allaqachon yechilgan!</h2>
-                <p>Siz bu testni faqat <b>bir marta</b> yechishingiz mumkin.</p>
-                ${info}
-                <button class="submit-btn" onclick="window.Telegram.WebApp.close()" style="background:#e74c3c; margin-top:20px;">Ilovani yopish</button>
+        document.body.innerHTML = `
+            <div class="container" style="max-width: 480px;">
+                <div class="lock-screen">
+                    <div class="icon">🔒</div>
+                    <h2>Test allaqachon yechilgan!</h2>
+                    <p>Siz bu testni faqat <b>bir marta</b> yechishingiz mumkin.</p>
+                    ${info}
+                    <button class="btn-close" onclick="window.Telegram.WebApp.close()">Ilovani yopish</button>
+                </div>
             </div>
         `;
-        document.getElementById('timer').innerHTML = "";
     }
 
     // ═══════════════════════════════════════════════
@@ -311,31 +836,36 @@
     //  VARIANTLI TEST (ABCD)
     // ═══════════════════════════════════════════════
     function createMCQWithText(num, text, options, optValues, imageUrl) {
-        let div = document.createElement('div');
-        div.className = 'q-row';
-        div.style.flexDirection = 'column';
-        div.style.alignItems = 'flex-start';
+        let card = document.createElement('div');
+        card.className = 'q-card';
 
-        let html = `<div class="q-text"><b>${num}.</b> ${text}</div>`;
-        
-        // YANGI: rasm ko'rsatish
+        let html = `<div class="q-header">
+            <span class="q-num">${num}</span>
+            <div class="q-text">${text}</div>
+        </div>`;
+
+        // ChatGPT havolasi
         if (imageUrl) {
-            html += `<img class="q-image" src="${imageUrl}" alt="Diagram" onerror="this.style.display='none'">`;
+            html += `<a class="q-image-link" href="${imageUrl}" target="_blank">
+                <span class="icon">🖼</span>
+                <span>Rasmni ChatGPT da ko'rish</span>
+            </a>`;
         }
-        
+
         html += `<div class="options-container" id="q${num}">`;
         options.forEach(opt => {
             const val = optValues ? (optValues[opt] || '') : opt;
             html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,${num})" title="${val}">${opt}</button>`;
         });
         html += `</div>`;
-        div.innerHTML = html;
-        form.appendChild(div);
 
-        // Har bir savol uchun MathJax ni qayta ishga tushirish
+        card.innerHTML = html;
+        form.appendChild(card);
+
+        // MathJax
         setTimeout(() => {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([div]).catch(() => {});
+                window.MathJax.typesetPromise([card]).catch(() => {});
             }
         }, 50);
     }
@@ -344,45 +874,61 @@
     //  33-35 MOSLASHTIRISH GURUHI
     // ═══════════════════════════════════════════════
     function createGroup(q) {
-        let div = document.createElement('div');
-        div.className = 'q-row';
-        div.style.flexDirection = 'column';
-        div.style.alignItems = 'flex-start';
+        let card = document.createElement('div');
+        card.className = 'group-card';
 
-        let html = `<div class="group-title">🔗 33–35. Moslashtirish topshirig'i</div>`;
-        
-        // YANGI: rasm ko'rsatish
+        let html = `<div class="group-label">🔗 33–35. Moslashtirish topshirig'i</div>`;
+
+        // ChatGPT havolasi
         if (q.image) {
-            html += `<img class="q-image" src="${q.image}" alt="Diagram" onerror="this.style.display='none'">`;
+            html += `<a class="q-image-link" href="${q.image}" target="_blank" style="margin-left:0; margin-bottom:14px;">
+                <span class="icon">🖼</span>
+                <span>Rasmni ChatGPT da ko'rish</span>
+            </a>`;
         }
-        
-        html += `<div class="q-text"><b>33.</b> ${q.sub33 || ''}</div>`;
-        html += `<div class="options-container" id="q33">`;
+
+        // 33
+        html += `<div class="sub-q">
+            <div class="sub-q-header">
+                <span class="sub-q-num">33</span>
+                <div class="sub-q-text">${q.sub33 || ''}</div>
+            </div>
+            <div class="options-container" id="q33">`;
         ["A","B","C","D","E","F"].forEach(opt => {
             html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,33)">${opt}</button>`;
         });
-        html += `</div>`;
+        html += `</div></div>`;
 
-        html += `<div class="q-text" style="margin-top:10px"><b>34.</b> ${q.sub34 || ''}</div>`;
-        html += `<div class="options-container" id="q34">`;
+        // 34
+        html += `<div class="sub-q">
+            <div class="sub-q-header">
+                <span class="sub-q-num">34</span>
+                <div class="sub-q-text">${q.sub34 || ''}</div>
+            </div>
+            <div class="options-container" id="q34">`;
         ["A","B","C","D","E","F"].forEach(opt => {
             html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,34)">${opt}</button>`;
         });
-        html += `</div>`;
+        html += `</div></div>`;
 
-        html += `<div class="q-text" style="margin-top:10px"><b>35.</b> ${q.sub35 || ''}</div>`;
-        html += `<div class="options-container" id="q35">`;
+        // 35
+        html += `<div class="sub-q">
+            <div class="sub-q-header">
+                <span class="sub-q-num">35</span>
+                <div class="sub-q-text">${q.sub35 || ''}</div>
+            </div>
+            <div class="options-container" id="q35">`;
         ["A","B","C","D","E","F"].forEach(opt => {
             html += `<button class="opt-btn" data-opt="${opt}" onclick="selectOpt(this,35)">${opt}</button>`;
         });
-        html += `</div>`;
+        html += `</div></div>`;
 
-        div.innerHTML = html;
-        form.appendChild(div);
+        card.innerHTML = html;
+        form.appendChild(card);
 
         setTimeout(() => {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([div]).catch(() => {});
+                window.MathJax.typesetPromise([card]).catch(() => {});
             }
         }, 50);
     }
@@ -391,28 +937,35 @@
     //  YOZMA TEST (a va b)
     // ═══════════════════════════════════════════════
     function createDoubleMathInput(num, text, subA, subB, imageUrl) {
-        let div = document.createElement('div');
-        div.className = 'q-row';
-        div.style.flexDirection = 'column';
-        
-        let html = `<div class="q-text"><b>${num}.</b> ${text || ''}</div>`;
-        
-        // YANGI: rasm ko'rsatish
+        let card = document.createElement('div');
+        card.className = 'q-card';
+
+        let html = `<div class="q-header">
+            <span class="q-num">${num}</span>
+            <div class="q-text">${text || ''}</div>
+        </div>`;
+
+        // ChatGPT havolasi
         if (imageUrl) {
-            html += `<img class="q-image" src="${imageUrl}" alt="Diagram" onerror="this.style.display='none'">`;
+            html += `<a class="q-image-link" href="${imageUrl}" target="_blank">
+                <span class="icon">🖼</span>
+                <span>Rasmni ChatGPT da ko'rish</span>
+            </a>`;
         }
-        
-        html += `
-            <span class="q-num" style="align-self:flex-start;">${num}. a) ${subA || 'Javob:'}</span>
+
+        html += `<div class="open-input">
+            <label class="open-label">a) ${subA || 'Javob:'}</label>
             <math-field id="q${num}a" virtual-keyboard-mode="onfocus"></math-field>
-            <span class="q-num" style="align-self:flex-start;">${num}. b) ${subB || 'Javob:'}</span>
-            <math-field id="q${num}b" virtual-keyboard-mode="onfocus"></math-field>`;
-        div.innerHTML = html;
-        form.appendChild(div);
+            <label class="open-label">b) ${subB || 'Javob:'}</label>
+            <math-field id="q${num}b" virtual-keyboard-mode="onfocus"></math-field>
+        </div>`;
+
+        card.innerHTML = html;
+        form.appendChild(card);
 
         setTimeout(() => {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([div]).catch(() => {});
+                window.MathJax.typesetPromise([card]).catch(() => {});
             }
         }, 50);
     }
@@ -434,67 +987,7 @@
         const compressedCode = BigInt('0b' + binaryWithPrefix).toString(36); 
 
         document.body.innerHTML = `
-            <style>
-              .card {
-                background: #ffffff;
-                padding: 25px;
-                border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                max-width: 350px;
-                margin: 50px auto;
-                text-align: center;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              }
-              .icon { font-size: 40px; margin-bottom: 10px; }
-              .card h1 { font-size: 20px; color: #2f3640; margin-bottom: 20px; }
-              .code-box {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: #f1f2f6;
-                padding: 10px 15px;
-                border-radius: 8px;
-                border: 1px solid #dcdde1;
-                margin-bottom: 15px;
-              }
-              .code-text {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 180px;
-                font-family: monospace;
-                font-size: 15px;
-                font-weight: bold;
-                color: #2f3640;
-              }
-              .copy-btn {
-                background: #4cd137;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-weight: bold;
-                flex-shrink: 0;
-                margin-left: 8px;
-              }
-              .copy-btn:hover { background: #44bd32; }
-              .alert { font-size: 14px; color: #718093; margin-bottom: 0; }
-              .close-btn {
-                width: 100%;
-                margin-top: 15px;
-                padding: 10px;
-                background: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                font-weight: bold;
-                cursor: pointer;
-              }
-              .close-btn:hover { background: #c0392b; }
-            </style>
-
-            <div class="card">
+            <div class="result-card">
                 <div class="icon">🔑</div>
                 <h1>Sizning Shaxsiy Kodingiz</h1>
                 <div class="code-box">
@@ -512,10 +1005,10 @@
         navigator.clipboard.writeText(codeText).then(() => {
             const btn = document.querySelector(".copy-btn");
             btn.innerText = "Nusxalandi! ✓";
-            btn.style.backgroundColor = "#27ae60";
+            btn.style.backgroundColor = "#059669";
             setTimeout(() => {
                 btn.innerText = "Nusxalash";
-                btn.style.backgroundColor = "#4cd137"; 
+                btn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
             }, 2000);
         });
     }
@@ -576,7 +1069,6 @@
                 }
             });
             
-            // Firebase ga natija + user_id + test_id yozish
             await fetch(url, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -589,7 +1081,6 @@
                 })
             });
 
-            // Lock ni saqlash
             const lock = checkLock(testId, userId);
             if (lock.lockKey) {
                 setLock(lock.lockKey, cd);
@@ -636,13 +1127,14 @@
         const now = new Date().getTime();
         const distance = deadline - now;
         const timerEl = document.getElementById("timer");
+        const timerText = document.getElementById("timerText");
 
         if (distance <= 0) {
             clearInterval(timerInterval);
             if (isInitialCheck) {
-                document.body.innerHTML = `<div class="container"><h3 style="color:red">Test ishlash vaqti tugagan! Testni ishlash imkonsiz.</h3></div>`;
+                document.body.innerHTML = `<div class="container"><div class="lock-screen"><div class="icon">⏰</div><h2>Test ishlash vaqti tugagan!</h2><p>Testni ishlash imkonsiz.</p></div></div>`;
             } else {
-                if (timerEl) timerEl.innerHTML = "Vaqt tugadi! Javoblar avtomatik yuborilmoqda...";
+                if (timerText) timerText.innerHTML = "Vaqt tugadi! Yuborilmoqda...";
                 sendToBot();
             }
         } else {
@@ -650,8 +1142,17 @@
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            if (timerEl) {
-                timerEl.innerHTML = `Qolgan vaqt: ${hours > 0 ? hours + ':' : ''}${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            if (timerText) {
+                let timeStr = "";
+                if (hours > 0) timeStr += hours + ":";
+                timeStr += (minutes < 10 ? '0' : '') + minutes + ":";
+                timeStr += (seconds < 10 ? '0' : '') + seconds;
+                timerText.innerHTML = timeStr;
+            }
+
+            if (distance < 60000 && timerEl) {
+                timerEl.classList.add("danger");
             }
         }
     }
